@@ -1,5 +1,6 @@
 package ru.safonoviv.roelr;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.safonoviv.roelr.Model.Skill.CharacterSkill;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
+@Getter
 public class SkillSelector {
     @Autowired
     private Map<String, CharacterSkill> skills;

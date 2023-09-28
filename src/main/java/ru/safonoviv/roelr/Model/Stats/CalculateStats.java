@@ -1,8 +1,9 @@
 package ru.safonoviv.roelr.Model.Stats;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.safonoviv.roelr.CharacterPrototypeConfig;
 import ru.safonoviv.roelr.Model.Character.CharacterPrototype;
@@ -17,6 +18,8 @@ import java.util.stream.Stream;
 
 
 @Component
+@Getter
+@Setter
 public class CalculateStats {
 
     @Autowired
@@ -40,9 +43,8 @@ public class CalculateStats {
         Map<String, Double> currentBonus = Arrays.stream(Bonus.values())
                 .collect(Collectors.toMap(String::valueOf, t -> 0.0, (a, b) -> b));
 
-        Stream.of(bonusAttack, bonusArmor, bonusJob, bonusTier).forEach(t -> {
-            t.getBonuses().forEach((key, value) -> currentBonus.put(key, currentBonus.get(key) + value));
-        });
+        Stream.of(bonusAttack, bonusArmor, bonusJob, bonusTier).forEach(t ->
+                t.getBonuses().forEach((key, value) -> currentBonus.put(key, currentBonus.get(key) + value)));
 
         DetailStats detailStats = new DetailStats();
 
@@ -119,21 +121,5 @@ public class CalculateStats {
         Double multiplierProgress = multiplier.getBonus(characterPlayable.getAttribute().getTierType().name()).getBonuses().get(Bonus.multiplierProgress.name());
         int level = getProgressLevel(curExp, multiplierProgress);
         updateStatsByLevel(characterPlayable,level);
-    }
-
-    public MultiplierApp getMultiplier() {
-        return multiplier;
-    }
-
-    public void setMultiplier(MultiplierApp multiplier) {
-        this.multiplier = multiplier;
-    }
-
-    public CharacterPrototypeConfig getCharacterPrototype() {
-        return characterPrototype;
-    }
-
-    public void setCharacterPrototype(CharacterPrototypeConfig characterPrototype) {
-        this.characterPrototype = characterPrototype;
     }
 }

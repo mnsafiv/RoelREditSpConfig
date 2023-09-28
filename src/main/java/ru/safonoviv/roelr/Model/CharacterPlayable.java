@@ -1,11 +1,17 @@
 package ru.safonoviv.roelr.Model;
 
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.safonoviv.roelr.Model.Character.CharacterPrototype;
 import ru.safonoviv.roelr.Model.Stats.CalculateStats;
 import ru.safonoviv.roelr.Model.Stats.DetailAttribute;
 import ru.safonoviv.roelr.Model.Stats.DetailStats;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CharacterPlayable {
 
     private String keyId;
@@ -23,29 +29,5 @@ public class CharacterPlayable {
                 characterPrototype.getAttackType(),
                 characterPrototype.getArmorType(),
                 characterPrototype.getTierType());
-    }
-
-    public CharacterPlayable() {
-
-    }
-
-    public String getKeyId() {
-        return keyId;
-    }
-
-    public DetailStats getStats() {
-        return stats;
-    }
-
-    public void setStats(DetailStats stats) {
-        this.stats = stats;
-    }
-
-    public DetailAttribute getAttribute() {
-        return attribute;
-    }
-
-    public void setAttribute(DetailAttribute attribute) {
-        this.attribute = attribute;
     }
 }

@@ -1,6 +1,9 @@
 package ru.safonoviv.roelr.Model.Character;
 
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.safonoviv.roelr.CharacterPrototypeConfig;
 import ru.safonoviv.roelr.Model.Enum.*;
@@ -10,7 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-
+@Getter
+@Setter
+@NoArgsConstructor
 public abstract class CharacterPrototype {
     private double hpBase;
     protected double atkBase;
@@ -63,8 +68,6 @@ public abstract class CharacterPrototype {
 
     }
 
-    public CharacterPrototype() {
-    }
 
     @Autowired
     public abstract String getId();
@@ -87,108 +90,4 @@ public abstract class CharacterPrototype {
                 '}';
     }
 
-
-    public double getHpBase() {
-        return hpBase;
-    }
-
-    public void setHpBase(double hpBase) {
-        this.hpBase = hpBase;
-    }
-
-    public double getAtkBase() {
-        return atkBase;
-    }
-
-    public void setAtkBase(double atkBase) {
-        this.atkBase = atkBase;
-    }
-
-    public double getDefBase() {
-        return defBase;
-    }
-
-    public void setDefBase(double defBase) {
-        this.defBase = defBase;
-    }
-
-    public double getSpdBase() {
-        return spdBase;
-    }
-
-    public void setSpdBase(double spdBase) {
-        this.spdBase = spdBase;
-    }
-
-    public double getHpProgress() {
-        return hpProgress;
-    }
-
-    public void setHpProgress(double hpProgress) {
-        this.hpProgress = hpProgress;
-    }
-
-    public double getAtkProgress() {
-        return atkProgress;
-    }
-
-    public void setAtkProgress(double atkProgress) {
-        this.atkProgress = atkProgress;
-    }
-
-    public double getDefProgress() {
-        return defProgress;
-    }
-
-    public void setDefProgress(double defProgress) {
-        this.defProgress = defProgress;
-    }
-
-    public double getSpdProgress() {
-        return spdProgress;
-    }
-
-    public void setSpdProgress(double spdProgress) {
-        this.spdProgress = spdProgress;
-    }
-
-    public List<CharacterSkill> getSkills() {
-        return skills;
-    }
-
-    public void setSkills(List<CharacterSkill> skills) {
-        this.skills = skills;
-    }
-
-    public TierType getTierType() {
-        return tierType;
-    }
-
-    public void setTierType(TierType tierType) {
-        this.tierType = tierType;
-    }
-
-    public AttackType getAttackType() {
-        return attackType;
-    }
-
-    public void setAttackType(AttackType attackType) {
-        this.attackType = attackType;
-    }
-
-    public JobType getJobType() {
-        return jobType;
-    }
-
-    public void setJobType(JobType jobType) {
-        this.jobType = jobType;
-    }
-
-    public ArmorType getArmorType() {
-        return armorType;
-    }
-
-    public void setArmorType(ArmorType armorType) {
-        this.armorType = armorType;
-    }
 }

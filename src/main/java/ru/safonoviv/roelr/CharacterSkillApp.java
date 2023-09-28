@@ -6,11 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import ru.safonoviv.roelr.Model.Enum.EnumConfig;
 import ru.safonoviv.roelr.Model.Skill.Arrow;
-import ru.safonoviv.roelr.Model.Skill.CharacterSkill;
 import ru.safonoviv.roelr.Model.Skill.Fireball;
 import ru.safonoviv.roelr.Model.Skill.MomentFireball;
 
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -46,10 +44,6 @@ public class CharacterSkillApp {
         return new MomentFireball(id,name,description,stats,behavior,enumConfig);
     }
 
-
-    public List<CharacterSkill> getSkill(List<String> skillKeys) {
-        return null;
-    }
 
 
 }
