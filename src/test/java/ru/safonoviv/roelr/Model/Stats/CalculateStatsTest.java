@@ -1,6 +1,6 @@
 package ru.safonoviv.roelr.Model.Stats;
 
-import org.junit.Assert;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.safonoviv.roelr.CharacterConfig;
-import ru.safonoviv.roelr.CharacterPrototypeApp;
 import ru.safonoviv.roelr.CharacterPrototypeConfig;
 import ru.safonoviv.roelr.Model.Character.Archer;
 import ru.safonoviv.roelr.Model.Character.CharacterPrototype;
@@ -33,27 +30,14 @@ class CalculateStatsTest {
     @Rule
     public MockitoRule initRule = MockitoJUnit.rule();
     private CalculateStats calculateStats;
-    private CharacterPrototypeApp factory;
     @Mock
-    private CharacterPlayable archerPlayable;
-    private final int level=5;
-
+    private CharacterPrototype character;
+    private CharacterPrototypeConfig characterPrototypeConfig;
 
 
     @BeforeEach
     public void init(){
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(CharacterConfig.class);
-        calculateStats=context.getBean("calculateStats",CalculateStats.class);
-        factory = context.getBean("characterPrototypeApp",CharacterPrototypeApp.class);
-        archerPlayable = factory.getCharacterPrototype("Archer", level);
-
-
-    }
-
-
-    @Test
-    void calculateStatsByLevel() {
-        CharacterPrototype character = Mockito.spy(new Archer());
+        character = Mockito.spy(new Archer());
 
         character.setArmorType(ArmorType.light);
         character.setAttackType(AttackType.physical);
@@ -70,27 +54,49 @@ class CalculateStatsTest {
         character.setHpProgress(100);
         character.setSpdProgress(0.02);
 
-        CharacterPrototypeConfig characterPrototypeConfig = new CharacterPrototypeConfig();
+        characterPrototypeConfig = new CharacterPrototypeConfig();
         characterPrototypeConfig.addCharacter("Archer",character);
 
+        calculateStats = Mockito.spy(new CalculateStats(getMultiplierApp(),characterPrototypeConfig));
+
+
+    }
+
+    @NotNull
+    private static MultiplierApp getMultiplierApp() {
         MultiplierApp multiplierApp = new MultiplierApp();
-        Map<String,Double> bonuses = new HashMap<>();
-        multiplierApp.addBonus(bonuses,"job");
+        Map<String,Double> jobBonuses = new HashMap<>();
+        jobBonuses.put("multiplierPhysicalAttack",1.0);
+        jobBonuses.put("multiplierMagicAttack",0.1);
+        jobBonuses.put("multiplierPureAttack",0.0);
+        jobBonuses.put("moveCost",1.0);
+        multiplierApp.addBonus(jobBonuses,JobType.range.name());
+
+        Map<String,Double> tierBonuses = new HashMap<>();
+        tierBonuses.put("multiplierProgress",120.0);
+        multiplierApp.addBonus(tierBonuses,TierType.elite.name());
+
+        Map<String,Double> attackBonuses = new HashMap<>();
+        tierBonuses.put("multiplierMagicAttack",0.5);
+        tierBonuses.put("multiplierPhysicalAttack",2.0);
+        tierBonuses.put("skillCost",2.0);
+        tierBonuses.put("moveCost",0.0);
+        multiplierApp.addBonus(attackBonuses,AttackType.physical.name());
 
 
-
-        CalculateStats calculateStats1 = Mockito.spy(new CalculateStats(multiplierApp,characterPrototypeConfig));
-        CharacterPrototype characterPrototype = characterPrototypeConfig.get("Archer");
-
-
-        System.out.println();
-
-
-
-        DetailStats detailStats = calculateStats.calculateStatsByLevel(character, 3);
-        int health = detailStats.getHealth();
+        Map<String,Double> armorBonuses = new HashMap<>();
+        armorBonuses.put("multiplierPhysicalDefence",0.5);
+        armorBonuses.put("multiplierMagicDefence",2.0);
+        multiplierApp.addBonus(armorBonuses,ArmorType.light.name());
+        return multiplierApp;
+    }
 
 
+    @Test
+    void calculateStatsByLevel() {
+        //level==3
+        int level = 3;
+        DetailStats detailStats = calculateStats.calculateStatsByLevel(character, level);
 
         assertEquals(detailStats.getHealth(),400,0.0);
         assertEquals(detailStats.getDamagePhysical(),390);
@@ -109,49 +115,77 @@ class CalculateStatsTest {
         assertEquals(detailStats.getSkillCost(),100);
 
 
+        //level==5
+        level=5;
+        detailStats = calculateStats.calculateStatsByLevel(character, level);
 
+        assertEquals(detailStats.getHealth(),600,0.0);
+        assertEquals(detailStats.getDamagePhysical(),450);
+        assertEquals(detailStats.getDamageMagic(),90);
+        assertEquals(detailStats.getDamagePure(),0);
+        assertEquals(detailStats.getDefencePhysical(),7);
+        assertEquals(detailStats.getDefenceMagic(),30);
 
-
-        CharacterPlayable archer = Mockito.spy(new CharacterPlayable());
-        DetailAttribute detailAttribute = Mockito.spy(new DetailAttribute());
-
-
-
-
-
-
-        archer.setAttribute(detailAttribute);
-        Mockito.doReturn(TierType.boss).when(detailAttribute).getTierType();
-        detailAttribute.getTierType();
-
-
-        assertEquals(level,archerPlayable.getAttribute().getLevel(),0.0);
+        assertEquals(detailStats.getMoveSpeed(),5);
+        assertEquals(detailStats.getMovePoint(),100);
+        assertEquals(detailStats.getActivePoint(),50);
+        assertEquals(detailStats.getSkillPoint(),100);
+        assertEquals(detailStats.getMoveCost(),1);
+        assertEquals(detailStats.getSkillDistance(),10);
+        assertEquals(detailStats.getSkillCast(),1);
+        assertEquals(detailStats.getSkillCost(),100);
 
     }
 
 
     @Test
     void getExpByLevel() {
-        calculateStats.updateStatsByLevel(archerPlayable,3);
-        int expByLevel = calculateStats.getExpByLevel(archerPlayable.getAttribute().getLevel(), archerPlayable.getAttribute().getTierType());
+        int level = 3;
+        CharacterPrototype characterPrototype = characterPrototypeConfig.get("Archer");
+        CharacterPlayable characterPlayable = new CharacterPlayable(characterPrototype,level,calculateStats);
+        int expByLevel = calculateStats.getExpByLevel(characterPlayable.getAttribute().getLevel(), characterPlayable.getAttribute().getTierType());
         assertEquals(expByLevel,250,0.0);
+
+        level=5;
+        calculateStats.updateStatsByLevel(characterPlayable,level);
+        expByLevel = calculateStats.getExpByLevel(characterPlayable.getAttribute().getLevel(), characterPlayable.getAttribute().getTierType());
+        assertEquals(expByLevel,558,0.0);
+
+
+        level=11;
+        calculateStats.updateStatsByLevel(characterPlayable,level);
+        expByLevel = calculateStats.getExpByLevel(characterPlayable.getAttribute().getLevel(), characterPlayable.getAttribute().getTierType());
+        assertEquals(expByLevel,2062,0.0);
 
 
     }
 
     @Test
     void updateStatsByLevel() {
-        calculateStats.updateStatsByLevel(archerPlayable,3);
-        assertEquals(3,archerPlayable.getAttribute().getLevel(),0.0);
+        int level = 3;
+        CharacterPrototype characterPrototype = characterPrototypeConfig.get("Archer");
+        CharacterPlayable characterPlayable = new CharacterPlayable(characterPrototype,0,calculateStats);
+        calculateStats.updateStatsByLevel(characterPlayable,level);
+        assertEquals(characterPlayable.getAttribute().getLevel(),level,0.0);
 
-
-
-
+        level=10;
+        calculateStats.updateStatsByLevel(characterPlayable,level);
+        assertEquals(characterPlayable.getAttribute().getLevel(),level,0.0);
+        
     }
 
     @Test
     void updateAttributeByExp() {
-        calculateStats.updateAttributeByExp(archerPlayable,2000);
-        assertEquals(10,archerPlayable.getAttribute().getLevel(),0.0);
+        CharacterPrototype characterPrototype = characterPrototypeConfig.get("Archer");
+        CharacterPlayable characterPlayable = new CharacterPlayable(characterPrototype,0,calculateStats);
+        calculateStats.updateAttributeByExp(characterPlayable,2000);
+        assertEquals(characterPlayable.getAttribute().getLevel(),10,0.0);
+
+        calculateStats.updateAttributeByExp(characterPlayable,4449);
+        assertEquals(characterPlayable.getAttribute().getLevel(),16,0.0);
+
+        calculateStats.updateAttributeByExp(characterPlayable,5558);
+        assertEquals(characterPlayable.getAttribute().getLevel(),18,0.0);
+
     }
 }
